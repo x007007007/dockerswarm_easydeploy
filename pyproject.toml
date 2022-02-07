@@ -1,0 +1,26 @@
+[project]
+name = "docker_swarm_easy_deploy"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "xingci.xu", email = "x007007007@hotmail.com"},
+]
+packages = [
+    "src"
+]
+dependencies = [
+    "django~=4.0",
+    "docker~=5.0",
+]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[project.urls]
+homepage = ""
+
+[tool]
+[tool.pdm]
+
+[build-system]
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
