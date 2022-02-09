@@ -25,12 +25,14 @@ SECRET_KEY = 'django-insecure-28ke9_h2ory*6t5jc6jin#_vvqlh@)8+bqybsoh!s1$$uby(vv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'grappelli',
+    'nested_admin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
