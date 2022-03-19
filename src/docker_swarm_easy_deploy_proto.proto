@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+// 定义一个服务
+service DeployClient {
+    // 客户端通信给服务端，通信方式可以随意选择，这里我选择第4种通信方式
+    rpc upload_file (stream ManagedFile) returns (stream Result);
+    rpc ping (Empty) returns (Result);
+    rpc info (Empty) returns (ClientInfo);
+    rpc create_service (stream ServiceConfig) returns (stream Result);
+    rpc delete_service (stream DockerResourceUUID) returns (stream Result);
+    rpc update_service (stream ServiceConfig) returns (stream Result);
+    rpc create_container (stream ContainerConfig) returns (stream Result);
+    rpc update_container (stream ContainerConfig) returns (stream Result);
+    rpc delete_container (stream DockerResourceUUID) returns (stream Result);
+    rpc update_node (stream NodeConfig) returns (stream Result);
+    rpc create_network (stream NetworkConfig) returns (stream Result);
+    rpc delete_network (stream DockerResourceUUID) returns (stream Result);
+}
+
+message ManagedFile {
+    string rel_path = 1;
+    bytes data = 2;
+    optional int32 uid = 3;
+    optional int32 gid = 4;
+    optional int32 perm = 5;
+}
+
+message ClientInfo {
+    string machine_uuid = 1;
+    string ip = 2;
+}
+
+message Empty {
+
+}
+
+message Result {
+    int32 status = 1;
+    optional string error_message = 2;
+    optional DockerResourceUUID resource = 3;
+}
+
+message DeployConstraintConfig {
+
+}
+
+message ServiceDeployConfig {
+    string is_global = 1;
+    int32 replication_num = 2;
+}
+
+message DockerResourceUUID {
+    string uuid = 1;
+}
+
+message BasicContainerRunConfig {
+    string image = 1;
+    repeated string cmds = 2;
+    repeated string entrypoints = 3;
+    map<string, string> envs = 4;
+    map<string, string> ports = 5;
+    map<string, string> volumes = 6;
+    map<string, string> label = 7;
+    repeated ContainerNetworkConfig networks = 8;
+}
+
+message ServiceConfig {
+    string name = 1;
+    BasicContainerRunConfig container = 2;
+    map<string, string> config = 3;
+    optional ServiceDeployConfig deploy = 5;
+    optional DeployConstraintConfig constraint = 6;
+}
+
+message ContainerConfig {
+    string name = 1;
+    BasicContainerRunConfig container = 2;
+}
+
+message NodeConfig {
+    map<string, string> label = 1;
+}
+
+message ContainerNetworkConfig {
+    string drivers = 1;
+    optional string name = 2;
+    map<string, string> optional = 3;
+}
+
+message NetworkConfig {
+    string name = 1;
+    string drivers = 2;
+    optional bool attachable = 3;
+    map<string, string> optional = 4;
+}

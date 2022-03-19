@@ -1,0 +1,23 @@
+# build stage
+FROM python:3.10 AS builder
+
+# install PDM
+RUN pip install -U pip setuptools wheel
+RUN pip install pdm
+
+# copy files
+COPY pyproject.toml pdm.lock README.md /project/
+COPY src/ /project/src
+
+# install dependencies and project
+WORKDIR /project
+RUN pdm install --prod --no-lock --no-editable
+
+
+# run stage
+FROM python:3.10
+ENV PYTHONPATH=/project/pkgs
+COPY --from=builder /project/__pypackages__/3.10/lib /project/pkgs
+
+# set command/entrypoint, adapt to fit your needs
+CMD ["python", "-m", "docker_swarm_easy_deploy_client"]

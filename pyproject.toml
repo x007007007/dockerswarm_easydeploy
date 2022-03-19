@@ -11,15 +11,30 @@ packages = [
 dependencies = [
     "django~=4.0",
     "docker~=5.0",
+    "grpcio~=1.44.0",
 ]
 requires-python = ">=3.10"
 license = {text = "MIT"}
+[project.scripts]
+    docker_swarm_easy_deploy_client = "dockerswarm_easydeploy_client.__main__:main"
+    docker_swarm_easy_deploy_management = "dockerswarm_easydeploy.__main__:main"
+
+[project.optional-dependencies]
+    tests = [
+        'pytest',
+    ]
+    builds = [
+        'grpcio-tools'
+    ]
 
 [project.urls]
 homepage = ""
 
+
 [tool]
 [tool.pdm]
+[tool.pdm.scripts]
+pre_build = "python -m grpc_tools.protoc -I./src --python_out=./src/ --grpc_python_out=./src ./src/docker_swarm_easy_deploy_proto.proto"
 
 [build-system]
 requires = ["pdm-pep517"]
