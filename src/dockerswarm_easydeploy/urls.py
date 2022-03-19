@@ -19,5 +19,6 @@ from django.urls import path, re_path, include
 urlpatterns = [
     path('grappelli/', include('grappelli.urls')),  # grappelli URLS
     path('admin/', admin.site.urls),
+    path('api/v1/', include("dockerswarm_easydeploy.apps.core.urls")),
     re_path(r'^_nested_admin/', include('nested_admin.urls')),
 ]

@@ -8,6 +8,7 @@ import requests
 import docker
 from loguru import logger
 import time
+import socket
 
 
 class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
@@ -98,8 +99,8 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
 
 
 class Register:
-    def __init__(self, service_host, listen_point=15005):
-        self.listen_point = listen_point
+    def __init__(self, service_host, listen_port=15005):
+        self.listen_port = listen_port
         self.service_host = service_host
 
     @staticmethod
@@ -117,14 +118,20 @@ class Register:
         except Exception as e:
             logger.exception("from env failed")
             docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
-        docker_client.info()
+        return docker_client.info()
+
+    def get_host_name(self):
+        return socket.getfqdn()
 
     def post_info(self):
-        logger.debug("")
-        res = requests.post(f"{self.service_host}/api/node/register/", json=dict(
+        req_data = dict(
             machine_id=self.get_machine_uuid(),
             docker_info=self.get_docker_info(),
-        ))
+            client_addr=self.get_host_name(),
+            client_port=self.listen_port
+        )
+        logger.debug(f"post: {req_data}")
+        res = requests.post(f"{self.service_host}/api/v1/node/register/", json=req_data)
         resp = res.json()
         logger.debug(f"{resp}")
 
@@ -150,7 +157,8 @@ def serve(hub_host, address=None, port=15005):
         volume_map_path="/Users/xxc/workspace/github.com/x007007007/docker_swarm_easy_deploy/output"
     ), server)
     register = Register(service_host=hub_host)
-    thread_pool.submit(register.start)
+    register_handle = thread_pool.submit(register.start)
+    register_handle.add_done_callback(server.stop)
     server.add_insecure_port(local_listen)
     server.start()
     server.wait_for_termination()

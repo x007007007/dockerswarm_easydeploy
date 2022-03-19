@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'dockerswarm_easydeploy.apps.core',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

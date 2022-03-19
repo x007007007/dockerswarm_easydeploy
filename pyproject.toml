@@ -13,6 +13,9 @@ dependencies = [
     "docker~=5.0",
     "grpcio~=1.44.0",
     "requests",
+    "djangorestframework",
+    "django-filter",
+    "markdown",
 ]
 requires-python = ">=3.10"
 license = {text = "MIT"}
