@@ -4,6 +4,7 @@ syntax = "proto3";
 service DeployClient {
     // 客户端通信给服务端，通信方式可以随意选择，这里我选择第4种通信方式
     rpc upload_file (stream ManagedFile) returns (stream Result);
+    rpc rm_folder (stream FolderInfo) returns (stream Result);
     rpc ping (Empty) returns (Result);
     rpc info (Empty) returns (ClientInfo);
     rpc create_service (stream ServiceConfig) returns (stream Result);
@@ -15,6 +16,10 @@ service DeployClient {
     rpc update_node (stream NodeConfig) returns (stream Result);
     rpc create_network (stream NetworkConfig) returns (stream Result);
     rpc delete_network (stream DockerResourceUUID) returns (stream Result);
+}
+
+message FolderInfo {
+    string rel_path = 1;
 }
 
 message ManagedFile {

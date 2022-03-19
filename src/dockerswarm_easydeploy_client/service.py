@@ -4,7 +4,10 @@ import os
 import grpc
 import typing
 from concurrent import futures
+import requests
 import docker
+from loguru import logger
+import time
 
 
 class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
@@ -94,15 +97,64 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
         raise NotImplementedError('Method not implemented!')
 
 
-def serve(address=None):
+class Register:
+    def __init__(self, service_host, listen_point=15005):
+        self.listen_point = listen_point
+        self.service_host = service_host
+
+    @staticmethod
+    def get_machine_uuid():
+        for f in ['/sys/class/dmi/id/board_serial', '/host/sys/class/dmi/id/board_serial']:
+            if os.path.exists(f):
+                with open("/sys/class/dmi/id/board_serial") as fp:
+                    return fp.read()
+        return ''
+
+    @staticmethod
+    def get_docker_info():
+        try:
+            docker_client = docker.from_env()
+        except Exception as e:
+            logger.exception("from env failed")
+            docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+        docker_client.info()
+
+    def post_info(self):
+        logger.debug("")
+        res = requests.post(f"{self.service_host}/api/node/register/", json=dict(
+            machine_id=self.get_machine_uuid(),
+            docker_info=self.get_docker_info(),
+        ))
+        resp = res.json()
+        logger.debug(f"{resp}")
+
+    def start(self):
+        while True:
+            try:
+                self.post_info()
+            except:
+                logger.exception("update status failed")
+            finally:
+                time.sleep(5)
+
+
+def serve(hub_host, address=None, port=15005):
     if address is None:
-        address = '0.0.0.0:15005'
+        address = '0.0.0.0'
+    local_listen = f"{address}:{port}"
+    logger.level("DEBUG")
     # gRPC 服务器
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    thread_pool = futures.ThreadPoolExecutor(max_workers=10)
+    server = grpc.server(thread_pool)
     pb2_grpc.add_DeployClientServicer_to_server(DockerSwarmEasyDeployClientService(
         volume_map_path="/Users/xxc/workspace/github.com/x007007007/docker_swarm_easy_deploy/output"
     ), server)
-    server.add_insecure_port(address)
+    register = Register(service_host=hub_host)
+    thread_pool.submit(register.start)
+    server.add_insecure_port(local_listen)
     server.start()
     server.wait_for_termination()
 
+
+if __name__ == '__main__':
+    serve(hub_host='http://127.0.0.1:8000')
