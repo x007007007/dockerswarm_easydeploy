@@ -13,7 +13,6 @@ class ServiceExportPolicyInlineAdmin(admin.TabularInline):
 class ServiceConfigModelAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "service_type",
         "stack",
         "host_name",
         "image",
