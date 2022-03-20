@@ -7,6 +7,7 @@ from concurrent import futures
 import requests
 import docker
 from docker.models.services import Service as DockerService
+from docker.types import EndpointSpec
 from loguru import logger
 import time
 import socket
@@ -112,6 +113,7 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
                 args=list(item.container.cmds),
                 name=item.name,
                 env=item.container.envs,
+                endpoint_spec=EndpointSpec(ports={int(k): int(v) for k, v in self.pb_decode(item.container.ports).items()}),
             )
             kwargs = self.pb_decode(kwargs)
             logger.debug(f"docker config: {kwargs}")
@@ -160,6 +162,7 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
     def create_network(self, request_iterator: typing.Iterator[pb2.NetworkConfig], context):
         """
         """
+        logger.debug(f"create_network: {request_iterator} {context}")
         c = self.get_docker_client()
         for nw_pb in request_iterator:
             nw_kwargs = dict(

@@ -7,16 +7,30 @@ service DeployClient {
     rpc rm_folder (stream FolderInfo) returns (stream Result);
     rpc ping (Empty) returns (Result);
     rpc info (Empty) returns (ClientInfo);
+
     rpc iter_image_info_filter (ImageFilter) returns (stream ImageInfo);
     rpc pull_image (ImageFilter) returns (ImageInfo);
     rpc push_image (ImageFilter) returns (stream ImageInfo);
+
     rpc delete_service (stream DockerResourceUUID) returns (stream Result);
     rpc update_service (stream ServiceConfig) returns (stream Result);
     rpc update_container (stream ContainerConfig) returns (stream Result);
     rpc delete_container (stream DockerResourceUUID) returns (stream Result);
+
     rpc update_node (stream NodeConfig) returns (stream Result);
+
     rpc create_network (stream NetworkConfig) returns (stream Result);
     rpc delete_network (stream DockerResourceUUID) returns (stream Result);
+
+    rpc create_volume (stream NetworkConfig) returns (stream Result);
+    rpc copy_volume (stream NetworkConfig) returns (stream Result);
+    rpc delete_volume (stream DockerResourceUUID) returns (stream Result);
+
+    rpc create_config (stream NetworkConfig) returns (stream Result);
+    rpc delete_config (stream NetworkConfig) returns (stream Result);
+
+    rpc create_secure (stream NetworkConfig) returns (stream Result);
+    rpc delete_secure (stream NetworkConfig) returns (stream Result);
 }
 
 

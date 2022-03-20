@@ -38,7 +38,7 @@ license_expression = {text = "MIT"}
     ]
 
 [project.urls]
-homepage = ""
+homepage = "https://github.com/x007007007/dockerswarm_easydeploy"
 
 
 [tool]

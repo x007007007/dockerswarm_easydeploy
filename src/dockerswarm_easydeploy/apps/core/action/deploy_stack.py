@@ -6,10 +6,9 @@ from ..models import StackConfigModel
 from dockerswarm_easydeploy_proto import client_pb2 as pb2, \
     client_pb2_grpc as pb2_grpc
 from loguru import logger
+from .base_action import BaseAction
 
-
-@dataclasses.dataclass
-class DeployStackAction:
+class DeployStackAction(BaseAction):
     obj: StackConfigModel
 
     def get_export_labels(self) -> typing.Dict:
@@ -19,7 +18,7 @@ class DeployStackAction:
 
     def get_export_network_config(self) -> typing.List[str]:
         return [
-            'traefik'
+            'traefik-public'
         ]
 
     def get_deploy_constraint(self):
@@ -28,6 +27,7 @@ class DeployStackAction:
 
     def iter_deploy_service(self):
         for service in self.obj.serviceconfigmodel_set.all():
+            logger.debug(f"deploy service: {service.stack.name}>{service.host_name}")
             yield pb2.ServiceConfig(
                 name=f"{service.stack.name}_{service.host_name}",
                 container=pb2.BasicContainerRunConfig(
@@ -51,10 +51,3 @@ class DeployStackAction:
                 )
             )
 
-    def send_query(self):
-        channel = grpc.insecure_channel('localhost:15005')
-        client = pb2_grpc.DeployClientStub(channel)
-        l = list(self.iter_deploy_service())
-        logger.info(l)
-        for i in client.update_service(iter(l)):
-            logger.debug(i.status)
