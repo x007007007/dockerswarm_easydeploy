@@ -8,7 +8,6 @@ authors = [
 packages = [
     "src"
 ]
-py_modules=['docker_swarm_easy_deploy_proto_pb2', 'docker_swarm_easy_deploy_proto_pb2_grpc']
 dependencies = [
     "django~=4.0",
     "docker~=5.0",
@@ -21,7 +20,7 @@ dependencies = [
     "django-autocomplete-light~=3.9.4"
 ]
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license_expression = {text = "MIT"}
 [project.scripts]
     docker_swarm_easy_deploy_client = "dockerswarm_easydeploy_client.__main__:main"
     docker_swarm_easy_deploy_management = "dockerswarm_easydeploy.__main__:main"
