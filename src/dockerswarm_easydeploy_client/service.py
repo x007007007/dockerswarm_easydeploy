@@ -51,7 +51,7 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
         """客户端通信给服务端，通信方式可以随意选择，这里我选择第4种通信方式
         """
         for mf in request_iterator:
-            output_path = os.path.join(self.volume_map_path, mf.ral_path)
+            output_path = os.path.join(self.volume_map_path, mf.rel_path)
             output_folder = os.path.dirname(output_path)
             if not os.path.exists(output_path):
                 os.makedirs(output_folder)
