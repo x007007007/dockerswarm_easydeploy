@@ -6,17 +6,43 @@ import typing
 from concurrent import futures
 import requests
 import docker
+from docker.models.services import Service as DockerService
 from loguru import logger
 import time
 import socket
+import functools
+from dockerswarm_easydeploy_client.pb_json_encoder import pb_decode
+
+
+def capture_error(fun):
+    @functools.wraps(fun)
+    def warper(*args, **kwargs):
+        try:
+            return fun(*args, **kwargs)
+        except:
+            logger.exception(f"{fun} failed")
+    return warper
 
 
 class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
+    __docker_client: typing.Optional[docker.DockerClient] = None
 
     def __init__(self, volume_map_path=None):
         if volume_map_path is None:
             volume_map_path = "/data"
         self.volume_map_path = volume_map_path
+
+    def get_docker_client(self) -> docker.DockerClient:
+        if self.__docker_client:
+            return self.__docker_client
+        try:
+            docker_client = docker.from_env()
+        except Exception as e:
+            logger.exception("from env failed")
+            docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+        self.__docker_client = docker_client
+        logger.debug(f"get_docker_client: {docker_client}")
+        return docker_client
 
     def upload_file(self, request_iterator: typing.Iterator[pb2.ManagedFile], context):
         """客户端通信给服务端，通信方式可以随意选择，这里我选择第4种通信方式
@@ -33,45 +59,89 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
 
     def ping(self, request, context):
         """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_code(grpc.StatusCode.OK)
+        return pb2.Result(
+            status=0
+        )
 
     def info(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def create_service(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        # c = self.get_docker_client()
+        # info = c.info()
+        context.set_code(grpc.StatusCode.OK)
+        return pb2.ClientInfo(
+            machine_uuid=Register.get_machine_uuid(),
+            hostname=Register.get_host_name(),
+        )
 
     def delete_service(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_code(grpc.StatusCode.OK)
         context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
-    def update_service(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+    def get_service_by_name(self, name) -> DockerService:
+        c = self.get_docker_client()
+        for service in c.services.list():
+            if service.name == name:
+                return service
 
-    def create_container(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+    def check_network(self, container_config: pb2.BasicContainerRunConfig):
+        c = self.get_docker_client()
+        network_map = {n.name: n for n in c.networks.list()}
+        for network in container_config.networks:
+            if network not in network_map:
+                logger.error(f"network `{network}` not exist")
+                return False
 
-    def update_container(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+    def pb_decode(self, obj):
+        return pb_decode(obj)
+
+    @capture_error
+    def update_service(self, request_iterator: typing.Iterator[pb2.ServiceConfig], context):
+        c = self.get_docker_client()
+        for item in request_iterator:
+            if self.check_network(item.container):
+                yield pb2.Result(
+                    status=1,
+                )
+                continue
+            kwargs = dict(
+                image=item.container.image,
+                command=list(item.container.entrypoints),
+                args=list(item.container.cmds),
+                name=item.name,
+                env=item.container.envs,
+            )
+            kwargs = self.pb_decode(kwargs)
+            logger.debug(f"docker config: {kwargs}")
+            if service := self.get_service_by_name(item.name):
+                logger.debug(f"update docker service `{item.name}` `{service.id}`")
+                service.update(
+                    **kwargs
+                )
+            else:
+                logger.debug(f"create docker service `{item.name}`")
+                service = c.services.create(**kwargs)
+                logger.debug(f"{service}")
+            yield pb2.Result(
+                status=0,
+                resource=pb2.DockerResourceUUID(
+                    uuid=service.id
+                )
+            )
+        context.set_code(grpc.StatusCode.OK)
+        # context.set_details('run finish')
+
+    # def create_container(self, request_iterator, context):
+    #     """Missing associated documentation comment in .proto file."""
+    #     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    #     context.set_details('Method not implemented!')
+    #     raise NotImplementedError('Method not implemented!')
+    #
+    # def update_container(self, request_iterator, context):
+    #     """Missing associated documentation comment in .proto file."""
+    #     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    #     context.set_details('Method not implemented!')
+    #     raise NotImplementedError('Method not implemented!')
 
     def delete_container(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
@@ -142,7 +212,7 @@ class Register:
             except:
                 logger.exception("update status failed")
             finally:
-                time.sleep(5)
+                time.sleep(600)
 
 
 def serve(hub_host, address=None, port=15005):

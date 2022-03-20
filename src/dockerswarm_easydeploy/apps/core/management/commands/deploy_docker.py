@@ -16,7 +16,7 @@ class Command(BaseCommand):
         channel = grpc.insecure_channel('localhost:15005')
         client = pb2_grpc.DeployClientStub(channel)
         res = client.upload_file(iter([pb2.ManagedFile(
-                rel_path="test",
+                rel_path="aaa/bb.config",
                 data=b'sss'
             )]))
 

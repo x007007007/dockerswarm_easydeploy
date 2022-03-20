@@ -31,6 +31,9 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    "django_loguru",
+    'dal',
+    'dal_select2',
     'grappelli',
     'nested_admin',
     'django.contrib.admin',
@@ -73,6 +76,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'dockerswarm_easydeploy.wsgi.application'
+
+DJANGO_LOGGING_MIDDLEWARE = {
+    'DEFAULT_FORMAT': True,
+    'MESSAGE_FORMAT': "<b><green>{time}</green> <cyan>{message}</cyan></b>",
+    'LOG_USER': False
+}
 
 
 # Database

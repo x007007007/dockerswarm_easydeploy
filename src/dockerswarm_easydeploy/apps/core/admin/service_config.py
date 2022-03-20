@@ -1,13 +1,19 @@
 from django.contrib import admin
 
-from ..models import ServiceConfigModel, ServiceExportPolicyModel, ServiceEnvConfigModel
+from ..models import ServiceConfigModel
 
 
 class ServiceExportPolicyInlineAdmin(admin.TabularInline):
-    max_num = 1
-    min_num = 0
-    model = ServiceExportPolicyModel
-
+    model = ServiceConfigModel.port_set.through
+    readonly_fields = (
+        "is_image_cnf",
+    )
+    fields = (
+        "id",
+        "inner_port",
+        "export_policy",
+        "is_image_cnf",
+    )
 
 class EnvConfigInlineAdmin(admin.TabularInline):
     model = ServiceConfigModel.env_set.through

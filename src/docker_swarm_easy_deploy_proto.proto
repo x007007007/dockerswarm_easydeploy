@@ -7,15 +7,30 @@ service DeployClient {
     rpc rm_folder (stream FolderInfo) returns (stream Result);
     rpc ping (Empty) returns (Result);
     rpc info (Empty) returns (ClientInfo);
-    rpc create_service (stream ServiceConfig) returns (stream Result);
+    rpc iter_image_info_filter (ImageFilter) returns (stream ImageInfo);
+    rpc pull_image (ImageFilter) returns (ImageInfo);
+    rpc push_image (ImageFilter) returns (stream ImageInfo);
     rpc delete_service (stream DockerResourceUUID) returns (stream Result);
     rpc update_service (stream ServiceConfig) returns (stream Result);
-    rpc create_container (stream ContainerConfig) returns (stream Result);
     rpc update_container (stream ContainerConfig) returns (stream Result);
     rpc delete_container (stream DockerResourceUUID) returns (stream Result);
     rpc update_node (stream NodeConfig) returns (stream Result);
     rpc create_network (stream NetworkConfig) returns (stream Result);
     rpc delete_network (stream DockerResourceUUID) returns (stream Result);
+}
+
+
+
+message ImageFilter {
+    optional string name = 1;
+}
+
+message ImageInfo {
+    string id = 1;
+    repeated string tags = 2;
+    map <string, string> labels = 3;
+    optional string attr_json = 4;
+    optional string history_json = 5;
 }
 
 message FolderInfo {
@@ -32,7 +47,7 @@ message ManagedFile {
 
 message ClientInfo {
     string machine_uuid = 1;
-    string ip = 2;
+    string hostname = 2;
 }
 
 message Empty {
@@ -46,7 +61,8 @@ message Result {
 }
 
 message DeployConstraintConfig {
-
+    map<string, string> placement_eq_constraint = 1;
+    map<string, string> placement_nq_constraint = 2;
 }
 
 message ServiceDeployConfig {
@@ -66,7 +82,10 @@ message BasicContainerRunConfig {
     map<string, string> ports = 5;
     map<string, string> volumes = 6;
     map<string, string> label = 7;
-    repeated ContainerNetworkConfig networks = 8;
+    repeated string networks = 8;
+    optional string hostname = 9;
+    optional string user = 10;
+    optional string workdir = 11;
 }
 
 message ServiceConfig {

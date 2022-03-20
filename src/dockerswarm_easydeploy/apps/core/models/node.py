@@ -17,6 +17,12 @@ class NodeModel(models.Model):
     is_enable = models.BooleanField(default=True)
     is_delete = models.BooleanField(default=False)
 
+    manage_point = models.ForeignKey(
+        "NodeManagePointModel",
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
     @property
     def is_swarm_node(self):
         if self.swarm_node_id:
@@ -30,6 +36,20 @@ class NodeModel(models.Model):
     @property
     def is_swarm_manager(self):
         return self.node_detail.get("Swarm", {}).get("ControlAvailable", False)
+
+
+class NodeManagePointModel(models.Model):
+    TYPE_SWARM = 'swarm'
+    TYPE_STANDALONE = 'standalone'
+    type = models.CharField(
+        choices=(
+            (TYPE_SWARM, TYPE_SWARM),
+            (TYPE_STANDALONE, TYPE_STANDALONE),
+        ),
+        max_length=32
+    )
+    manage_id = models.CharField(max_length=254, help_text="swarm 就是集群id", blank=True, default="")
+
 
 
 class NodeGroupModel(models.Model):

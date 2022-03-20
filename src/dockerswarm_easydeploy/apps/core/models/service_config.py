@@ -1,18 +1,6 @@
 from django.db import models
 
 
-class ServiceEnvConfigModel(models.Model):
-    env_item = models.ForeignKey("EvnItemModel", on_delete=models.CASCADE, null=True)
-    value = models.CharField(max_length=254, null=True, blank=True, help_text="值")
-    key = models.CharField(max_length=254, null=True, blank=True, help_text="使用新的名称")
-    service = models.ForeignKey("ServiceConfigModel", on_delete=models.CASCADE)
-
-    @property
-    def real_value(self):
-        if self.env_item:
-            return self.env_item.value
-        return self.env_item.value
-
 class ServiceConfigModel(models.Model):
     host_name = models.CharField(max_length=100)
     stack = models.ForeignKey(
@@ -21,9 +9,10 @@ class ServiceConfigModel(models.Model):
         blank=True,
         on_delete=models.SET_NULL
     )
+    service_id = models.CharField(max_length=254, editable=False)
     is_stateless = models.BooleanField(default=False)
-    env_set = models.ManyToManyField(through=ServiceEnvConfigModel, to="EvnItemModel")
-
+    env_set = models.ManyToManyField(through="ServiceEnvConfigModel", to="EvnItemModel")
+    port_set = models.ManyToManyField(through="ServicePortConfigModel", to="ServiceExportPolicyItemModel")
     image = models.CharField(max_length=254)
     deploy_policy = models.ForeignKey(
         "ServiceDeployPolicyModel",
@@ -31,3 +20,9 @@ class ServiceConfigModel(models.Model):
         null=True,
         blank=True,
     )
+    cmds = models.TextField(default="", blank=True, help_text="一个命令一行,同Args")
+    entrypoint = models.TextField(default="", blank=True, help_text="入口")
+
+
+    def __str__(self):
+        return f"<{self.__class__.__name__} ({self.pk}) hn:{self.host_name} i:{self.image}>"

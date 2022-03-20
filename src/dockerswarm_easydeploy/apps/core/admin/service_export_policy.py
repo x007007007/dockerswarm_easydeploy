@@ -1,17 +1,23 @@
 from django.contrib import admin
 
-from ..models import ServiceConfigModel, ServiceDeployPolicyModel, ServiceExportPolicyItemModel, ServiceExportPolicyModel
+from ..models import ServicePortConfigModel, ServiceExportPolicyItemModel
 
 
-class ServiceExportPolicyItemModelInlineAdmin(admin.TabularInline):
-    model = ServiceExportPolicyItemModel
-
-
-@admin.register(ServiceExportPolicyModel)
-class ServiceExportPolicyModelAdmin(admin.ModelAdmin):
+@admin.register(ServicePortConfigModel)
+class ServicePortConfigModelAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'only_apply_for_service',
-        'only_apply_for_stack',
+        "is_image_cnf",
+        "export_policy",
+        "service",
+        "inner_port",
     )
-    inlines = [ServiceExportPolicyItemModelInlineAdmin]
+    
+    
+@admin.register(ServiceExportPolicyItemModel)
+class ServiceExportPolicyItemModelAdmin(admin.ModelAdmin):
+    list_display = (
+        "protocol",
+        "is_force_https",
+        "sni_name",
+        "port",
+    )
