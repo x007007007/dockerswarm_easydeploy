@@ -8,6 +8,7 @@ authors = [
 packages = [
     "src"
 ]
+py_modules=['docker_swarm_easy_deploy_proto_pb2', 'docker_swarm_easy_deploy_proto_pb2_grpc']
 dependencies = [
     "django~=4.0",
     "docker~=5.0",
@@ -43,5 +44,5 @@ homepage = ""
 [tool]
 [tool.pdm]
 [tool.pdm.scripts]
-pre_build = "python -m grpc_tools.protoc -I./src --python_out=./src/ --grpc_python_out=./src ./src/docker_swarm_easy_deploy_proto.proto"
+pre_build = "bash pre_build.sh"
 

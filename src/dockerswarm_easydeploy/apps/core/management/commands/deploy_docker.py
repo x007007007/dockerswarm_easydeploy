@@ -1,10 +1,8 @@
-from django.core.management import CommandError, BaseCommand
-from dockerswarm_easydeploy.apps.core.models import (
-    ExportConfigModel,
-)
+from django.core.management import BaseCommand
 import grpc
-import docker_swarm_easy_deploy_proto_pb2 as pb2
-import docker_swarm_easy_deploy_proto_pb2_grpc as pb2_grpc
+from dockerswarm_easydeploy_proto import client_pb2 as pb2, \
+    client_pb2_grpc as pb2_grpc
+
 
 class Command(BaseCommand):
 
