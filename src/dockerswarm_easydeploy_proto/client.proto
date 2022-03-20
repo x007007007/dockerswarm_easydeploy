@@ -113,7 +113,13 @@ message ContainerNetworkConfig {
 
 message NetworkConfig {
     string name = 1;
-    string drivers = 2;
+    string driver = 2;
     optional bool attachable = 3;
-    map<string, string> optional = 4;
+    map<string, string> options = 4;
+    optional string ipam = 5;
+    map<string, string> labels = 6;
+    optional bool enable_ipv6 = 7;
+    optional bool ingress = 8;
+    optional string scope = 9;
+    optional bool internal = 10;
 }

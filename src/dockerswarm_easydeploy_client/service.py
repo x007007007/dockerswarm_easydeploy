@@ -32,6 +32,9 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
             volume_map_path = "/data"
         self.volume_map_path = volume_map_path
 
+    def pb_decode(self, obj):
+        return pb_decode(obj)
+
     def get_docker_client(self) -> docker.DockerClient:
         if self.__docker_client:
             return self.__docker_client
@@ -92,8 +95,6 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
                 logger.error(f"network `{network}` not exist")
                 return False
 
-    def pb_decode(self, obj):
-        return pb_decode(obj)
 
     @capture_error
     def update_service(self, request_iterator: typing.Iterator[pb2.ServiceConfig], context):
@@ -155,9 +156,33 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def create_network(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    def create_network(self, request_iterator: typing.Iterator[pb2.NetworkConfig], context):
+        """
+        """
+        c = self.get_docker_client()
+        for nw_pb in request_iterator:
+            nw_kwargs = dict(
+                name=nw_pb.name,
+                options=nw_pb.options,
+                driver=nw_pb.driver,
+                internal=nw_pb.internal or False,
+                labels=nw_pb.labels or None,
+                enable_ipv6=nw_pb.enable_ipv6 or False,
+                attachable=nw_pb.attachable or False,
+                scope=nw_pb.scope,
+                ingress=nw_pb.ingress,
+            )
+            if nw_pb.ipam: nw_kwargs['ipam'] = nw_pb.ipam
+            nw_kwargs = self.pb_decode(nw_kwargs)
+            logger.debug(f"network create args: {nw_kwargs}")
+            res = c.networks.create(**nw_kwargs)
+            yield pb2.Result(
+                status=0,
+                resource=pb2.DockerResourceUUID(
+                    uuid=res.id,
+                )
+            )
+        context.set_code(grpc.StatusCode.OK)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
