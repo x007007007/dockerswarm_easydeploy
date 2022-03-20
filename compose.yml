@@ -1,0 +1,21 @@
+version: "2"
+
+services:
+  dockerswarm-easydeploy:
+#    image: dockerswarm_easydeploy:a2
+    build:
+      dockerfile: Dockerfile.client
+    command:
+      - python
+      - -m
+      - dockerswarm_easydeploy
+    volumes:
+      - /data/
+    environment:
+      DATABASE_ROOT: /data
+  dockerswarm-easydeploy-client:
+#    image: dockerswarm_easydeploy:a2
+    build:
+      dockerfile: Dockerfile.client
+    environment:
+      DOCKERSWARM_EASYDEPLOY_HUB: dockerswarm-easydeploy

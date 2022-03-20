@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -86,11 +86,13 @@ DJANGO_LOGGING_MIDDLEWARE = {
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
+DATABASE_ROOT = os.environ.get("DATABASE_ROOT", BASE_DIR)
+if not os.path.exists(DATABASE_ROOT):
+    os.makedirs(DATABASE_ROOT)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(DATABASE_ROOT, 'db.sqlite3'),
     }
 }
 
