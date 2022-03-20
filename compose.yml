@@ -3,6 +3,8 @@ version: "2"
 services:
   dockerswarm-easydeploy:
 #    image: dockerswarm_easydeploy:a2
+    ports:
+      - "8000:8000"
     build:
       dockerfile: Dockerfile.client
     command:

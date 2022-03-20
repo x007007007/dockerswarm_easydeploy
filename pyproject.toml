@@ -12,13 +12,14 @@ dependencies = [
     "django~=4.0",
     "docker~=5.0",
     "django-grappelli",
+    "django-nested-admin",
+    "django-autocomplete-light~=3.9.4",
     "grpcio~=1.44.0",
     "requests",
     "djangorestframework",
     "django-filter",
     "markdown",
     "django_loguru",
-    "django-autocomplete-light~=3.9.4"
 ]
 requires-python = ">=3.10"
 license_expression = {text = "MIT"}

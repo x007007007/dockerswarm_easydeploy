@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "django_loguru",
-    'dal',
+    'dal',  # django-autocomplete
     'dal_select2',
     'grappelli',
     'nested_admin',
@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mptt',
-    'dockerswarm_easydeploy.apps.core',
     'rest_framework',
+    'dockerswarm_easydeploy.apps.core',
 ]
 
 MIDDLEWARE = [
