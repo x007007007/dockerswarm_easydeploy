@@ -11,3 +11,5 @@ from .service_config import ServiceConfigModel
 from .service_env_config import ServiceEnvConfigModel
 from .env_item import EnvNodeModel, EvnItemModel
 from .network import NetworkModel
+from .node_local_network import NodeLocalNetworkModel
+from .service_network import ServiceNetworkModel

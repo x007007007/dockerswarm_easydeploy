@@ -29,6 +29,11 @@ class EnvConfigInlineAdmin(admin.TabularInline):
     )
 
 
+class NetworkConfigInlineAdmin(admin.TabularInline):
+    model = ServiceConfigModel.network_set.through
+
+
+
 @admin.register(ServiceConfigModel)
 class ServiceConfigModelAdmin(admin.ModelAdmin):
     list_display = (
@@ -40,6 +45,7 @@ class ServiceConfigModelAdmin(admin.ModelAdmin):
     )
 
     inlines = [
+        NetworkConfigInlineAdmin,
         EnvConfigInlineAdmin,
         ServiceExportPolicyInlineAdmin,
     ]

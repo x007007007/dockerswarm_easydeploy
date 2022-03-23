@@ -22,4 +22,5 @@ class NetworkModel(models.Model):
     enable_encrypted = models.BooleanField(default=False, help_text='用于overlay模式, linux only')
     attachable = models.BooleanField(default=False, help_text='')
 
-
+    def __str__(self):
+        return f"<{self.__class__.__name__}({self.id}) {self.type} {self.name}>"

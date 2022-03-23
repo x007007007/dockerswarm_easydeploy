@@ -11,6 +11,10 @@ class ServiceConfigModel(models.Model):
         blank=True,
         on_delete=models.SET_NULL
     )
+    network_set = models.ManyToManyField(
+        through="ServiceNetworkModel",
+        to="NetworkModel",
+    )
     service_id = models.CharField(max_length=254, editable=False)
     is_stateless = models.BooleanField(default=False)
     env_set = models.ManyToManyField(through="ServiceEnvConfigModel", to="EvnItemModel")

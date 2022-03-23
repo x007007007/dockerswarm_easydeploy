@@ -14,6 +14,12 @@ class NodeModel(models.Model):
     last_update_time = models.DateTimeField(null=True)
     created_time = models.DateTimeField(auto_now_add=True, null=True)
 
+    local_network_set = models.ManyToManyField(
+        through="NodeLocalNetworkModel",
+        to="NetworkModel",
+        related_name="node_set"
+    )
+
     is_enable = models.BooleanField(default=True)
     is_delete = models.BooleanField(default=False)
 
