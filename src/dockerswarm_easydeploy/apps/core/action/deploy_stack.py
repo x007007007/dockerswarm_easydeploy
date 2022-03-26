@@ -8,6 +8,7 @@ from dockerswarm_easydeploy_proto import client_pb2 as pb2, \
 from loguru import logger
 from .base_action import BaseAction
 
+
 class DeployStackAction(BaseAction):
     obj: StackConfigModel
 

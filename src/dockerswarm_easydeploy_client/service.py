@@ -1,3 +1,5 @@
+import json
+
 from dockerswarm_easydeploy_proto import client_pb2 as pb2, \
     client_pb2_grpc as pb2_grpc
 import os
@@ -13,6 +15,7 @@ import time
 import socket
 import functools
 from dockerswarm_easydeploy_client.pb_json_encoder import pb_decode
+from dockerswarm_easydeploy_client.image.image_info import iter_image_info_filter
 
 
 def capture_error(fun):
@@ -135,17 +138,21 @@ class DockerSwarmEasyDeployClientService(pb2_grpc.DeployClientServicer):
         context.set_code(grpc.StatusCode.OK)
         # context.set_details('run finish')
 
-    # def create_container(self, request_iterator, context):
-    #     """Missing associated documentation comment in .proto file."""
-    #     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    #     context.set_details('Method not implemented!')
-    #     raise NotImplementedError('Method not implemented!')
-    #
-    # def update_container(self, request_iterator, context):
-    #     """Missing associated documentation comment in .proto file."""
-    #     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    #     context.set_details('Method not implemented!')
-    #     raise NotImplementedError('Method not implemented!')
+    def iter_image_info_filter(self, request: pb2.ImageFilter, context):
+        logger.debug(f"iter_image_info_filter, {request}")
+        for info in iter_image_info_filter(client=self.get_docker_client(), name=request.name):
+            kwargs = self.pb_decode(dict(
+                id=info["id"],
+                tags=info['tags'],
+                labels=info['labels'],
+                attr_json=json.dumps(info["attrs"]),
+                history_json=json.dumps(info["history"]),
+            ))
+            yield pb2.ImageInfo(
+                **kwargs
+            )
+
+        context.set_code(grpc.StatusCode.OK)
 
     def delete_container(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
@@ -219,8 +226,9 @@ class Register:
             docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
         return docker_client.info()
 
-    def get_host_name(self):
-        return socket.getfqdn()
+    @staticmethod
+    def get_host_name():
+        return socket.gethostname()
 
     def post_info(self):
         req_data = dict(

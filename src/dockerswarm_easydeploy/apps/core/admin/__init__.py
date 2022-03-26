@@ -6,3 +6,4 @@ from . import node_group
 from . import env_item
 from . import stack
 from . import network
+from . import image
