@@ -3,7 +3,9 @@ import typing
 from django.db import models
 from loguru import logger
 
+
 class ServiceConfigModel(models.Model):
+    image = models.ForeignKey("ImageSerialNodel", on_delete=models.CASCADE)
     host_name = models.CharField(max_length=100)
     stack = models.ForeignKey(
         "StackConfigModel",
@@ -19,7 +21,6 @@ class ServiceConfigModel(models.Model):
     is_stateless = models.BooleanField(default=False)
     env_set = models.ManyToManyField(through="ServiceEnvConfigModel", to="EvnItemModel")
     port_set = models.ManyToManyField(through="ServicePortConfigModel", to="ServiceExportPolicyItemModel")
-    image = models.CharField(max_length=254)
     deploy_policy = models.ForeignKey(
         "ServiceDeployPolicyModel",
         on_delete=models.SET_NULL,
@@ -31,7 +32,7 @@ class ServiceConfigModel(models.Model):
 
 
     def __str__(self):
-        return f"<{self.__class__.__name__} ({self.pk}) hn:{self.host_name} i:{self.image}>"
+        return f"<{self.__class__.__name__} ({self.pk}) hn:{self.host_name} i:{self.image.name}>"
 
     def get_port_map(self) -> typing.Dict[str, str]:
         from .service_export_policy_item import ServiceExportPolicyItemModel

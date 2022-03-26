@@ -15,6 +15,7 @@ class ServiceExportPolicyInlineAdmin(admin.TabularInline):
         "is_image_cnf",
     )
 
+
 class EnvConfigInlineAdmin(admin.TabularInline):
     model = ServiceConfigModel.env_set.through
 
