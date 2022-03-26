@@ -2,7 +2,7 @@ from django.contrib import admin
 from ..models import (
     ImageModel,
     ImageEnvModel,
-    ImageLabel,
+    ImageLabelModel,
     ImageRepoModel,
     ImageSerialNodel,
     ImageTagModel,
@@ -17,6 +17,7 @@ class ImageEnvModelInlineAdmin(admin.TabularInline):
         'value',
     )
     max_num = 0
+    can_delete = False
 
 
 @admin.register(ImageModel)

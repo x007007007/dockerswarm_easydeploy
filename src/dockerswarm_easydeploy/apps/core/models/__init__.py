@@ -5,7 +5,7 @@ from .export_config import ExportConfigModel
 from .image import (
     ImageModel,
     ImageExposeModel,
-    ImageLabel,
+    ImageLabelModel,
     ImageEnvModel,
     ImageTagModel,
     ImageRepoModel,

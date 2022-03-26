@@ -9,6 +9,7 @@ from loguru import logger
 from .base_action import BaseAction
 
 
+@dataclasses.dataclass
 class DeployStackAction(BaseAction):
     obj: StackConfigModel
 
@@ -32,7 +33,7 @@ class DeployStackAction(BaseAction):
             yield pb2.ServiceConfig(
                 name=f"{service.stack.name}_{service.host_name}",
                 container=pb2.BasicContainerRunConfig(
-                    image=service.image,
+                    image=service.image.get_image_url(),
                     cmds=[],
                     entrypoints=[],
                     envs={},

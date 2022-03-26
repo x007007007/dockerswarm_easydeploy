@@ -6,6 +6,13 @@ from django.db import models
 class ImageSerialNodel(models.Model):
     name = models.CharField(max_length=254, blank=True, default="")
 
+    def __str__(self):
+        return f"<{self.__class__.__name__} ({self.id}) {self.name}>"
+
+    def get_image_url(self):
+        return self.name
+
+
 class ImageQuerySet(models.QuerySet):
     pass
 
@@ -33,8 +40,22 @@ class ImageModel(models.Model):
         ]):
             self.imageenvmodel_set.add(obj, bulk=False)
 
+    def update_label_list(self, label_map: typing.Dict[str, str]):
+        l = self.imageenvmodel_set.values_list('key', 'value')
+        db_list = set((i[0], i[1]) for i in l)
+        new_list = set((k, v) for k, v in label_map.items())
+        self.imagelabelmodel_set.filter(key__in=(item[0] for item in db_list - new_list)).delete()
+        for obj in ImageLabel.objects.bulk_create([
+            ImageLabel(
+                key=item[0],
+                value=item[1],
+                image=self,
+            ) for item in new_list - db_list
+        ]):
+            self.imagelabelmodel_set.add(obj, bulk=False)
 
-class ImageLabel(models.Model):
+
+class ImageLabelModel(models.Model):
     key = models.CharField(max_length=254)
     value = models.CharField(max_length=254, blank=True, null=True)
     image = models.ForeignKey("ImageModel", on_delete=models.CASCADE)

@@ -40,7 +40,7 @@ class ReadDockerImageAction:
         if (image := ImageModel.objects.filter(hash=image_info.id).first()) is None:
             image, is_create = ImageModel.objects.update_or_create(
                 defaults=dict(
-                    name=ImageSerialNodel.objects.create(name=select_name),
+                    name=ImageSerialNodel.objects.get_or_create(name=select_name)[0],
                     entrypoint=attrs['Config'].get("Entrypoint") or [],
                     cmds=attrs['Config'].get("Cmd") or [],
                     user=attrs['Config'].get("User") or '',
@@ -50,13 +50,15 @@ class ReadDockerImageAction:
                 hash=image_info.id
             )
         image.update_env_list(env)
+        # image.update_label_list(label)
+        # image.update_volumes_list(volumes)
+        # image.update_port_list(port)
 
         return image, is_create
 
     def iter_send_query(self, name=None, client_host=None) -> typing.List[ImageModel]:
         if client_host is None:
             client_host = self.node.get_client_connect_str()
-        res = []
         with grpc.insecure_channel(client_host) as channel:
             client = pb2_grpc.DeployClientStub(channel)
 
